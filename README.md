@@ -1,27 +1,52 @@
-🛠 Feature: Edit User Profile (Chỉnh sửa hồ sơ)
-Endpoint: PUT /api/user/profile
+# 🛠 Hướng dẫn Tính năng: Edit User Profile
 
-🛡️ 4 Lớp Bảo mật (Security Stack)
-Lớp 1 (Rate Limiting): Giới hạn 10 yêu cầu/15 phút để chống spam cập nhật dữ liệu.
-Lớp 2 (Authentication): Xác thực người dùng (Hiện tại đang Mock ID = 1).
-Lớp 3 (Authorization):
-Sử dụng Middleware kiểm tra Role.
-Chống IDOR: ID người dùng được lấy trực tiếp từ Token (req.user.id), ngăn chặn việc sửa hồ sơ của người khác.
-Lớp 4 (Input Validation):
-Kiểm tra định dạng số điện thoại Việt Nam bằng Regex chuẩn.
-Ràng buộc độ dài Họ và Tên (tối thiểu 2 ký tự).
-Kiểm tra kiểu dữ liệu Boolean cho giới tính.
-📝 Dữ liệu đầu vào (Request Body)
-Hệ thống sử dụng Whitelist, chỉ chấp nhận các trường sau:
+Tính năng này cho phép người dùng cập nhật thông tin cá nhân một cách an toàn thông qua kiến trúc bảo mật 4 lớp.
 
-firstName: Tên (String)
-lastName: Họ (String)
-phoneNumber: Số điện thoại (10 số, Regex VN)
-address: Địa chỉ (String)
-gender: Giới tính (Boolean: true/false)
-image: Ảnh đại diện (String)
-🚫 Ràng buộc nghiệp vụ
-Uniqueness: Số điện thoại cập nhật không được trùng với người dùng khác trong hệ thống.
-Security Whitelist: Các trường nhạy cảm như roleId, isActive, password sẽ bị bỏ qua nếu người dùng cố tình gửi lên.
-🧪 Cách Test nhanh
-Sử dụng file test-user.rest (REST Client) hoặc bộ sưu tập Postman kèm theo dự án để thử nghiệm các kịch bản: Thành công, Lỗi định dạng, Trùng số điện thoại, Chống Hack Role.
+## 📡 API Information
+- **Endpoint:** `PUT /api/user/profile`
+- **Content-Type:** `application/json`
+
+---
+
+## 🛡️ Cấu trúc Bảo mật 4 Lớp (Security Stack)
+
+| Lớp | Tên lớp | Cơ chế hoạt động |
+| :--- | :--- | :--- |
+| **1** | **Rate Limiting** | Chặn Spam/DDoS: Giới hạn **10 yêu cầu/15 phút** cho mỗi IP. |
+| **2** | **Authentication** | Xác thực danh tính: Hiện đang sử dụng Mock Auth (gán cứng User ID = 1). |
+| **3** | **Authorization** | Chống lỗi **IDOR**: Lấy ID từ Token, không cho phép sửa hồ sơ người khác. |
+| **4** | **Input Validation** | Kiểm tra dữ liệu: Dùng Regex chuẩn VN cho số điện thoại, check độ dài tên. |
+
+---
+
+## 📝 Cấu trúc Dữ liệu (Request Body)
+
+Hệ thống sử dụng **Whitelist**, chỉ những trường sau đây mới được phép cập nhật:
+
+```json
+{
+    "firstName": "Nguyen",
+    "lastName": "Phu",
+    "phoneNumber": "0912345678",
+    "address": "TP. Ho Chi Minh",
+    "gender": true,
+    "image": "avatar.png"
+}
+```
+
+*   **phoneNumber:** Phải bắt đầu bằng `0` hoặc `84`, đúng đầu số nhà mạng Việt Nam, độ dài tối xác định.
+*   **gender:** Kiểu Boolean (`true`: Nam, `false`: Nữ).
+
+---
+
+## 🚫 Các ràng buộc quan trọng
+1.  **Phone Uniqueness:** Nếu số điện thoại mới đã tồn tại ở một tài khoản khác, API sẽ trả về lỗi `409 Conflict`.
+2.  **Database Constraint:** Cột số điện thoại trong DB đã được giới hạn tối ưu ở mức 10 ký tự.
+3.  **Field Protection:** Các trường như `roleId`, `isActive`, `password` được bảo vệ, không thể thay đổi thông qua API này.
+
+---
+
+## 🧪 Hướng dẫn Testing
+Bạn có thể sử dụng các công cụ sau đã được tích hợp sẵn trong project:
+1.  **REST Client:** Mở file `test-user.rest` và bấm *Send Request*.
+2.  **Postman:** Import file `postman_collection.json` và chạy các request trong thư mục *User - Profile*.
