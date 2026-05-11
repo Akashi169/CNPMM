@@ -1,0 +1,20 @@
+# Thư mục thư viện (Rất nặng, không up)
+node_modules/
+backend/node_modules/
+reactjs01/node_modules/
+
+# File bảo mật (Mật khẩu, Key... không up)
+.env
+backend/.env
+reactjs01/.env.development
+reactjs01/.env.local
+
+# File log và rác hệ thống
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.DS_Store
+
+# Thư mục build (Không cần up)
+dist/
+build/
